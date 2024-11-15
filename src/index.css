@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face{
+    font-family: 'Terminus';
+    src: url('../public/font/TerminusTTF-4.49.3.ttf') format('truetype');
+}
+@font-face{
+    font-family: 'PressStart2P';
+    src: url("../public/font/PressStart2P.ttf") format('truetype');
+
+}
