@@ -128,6 +128,10 @@ export function Tamagotchi() {
           setInventory((prevInventory) => prevInventory.map((item) => item.name === value ? { ...item, count: item.count + 1 } : item));
         setCoins((prev) => Math.max(prev - 20, 0));}
         break;
+      case "revivir":
+        if(coins >= 30){
+         
+          setCoins((prev) => Math.max(prev - 30, 0));}
       }
         
    

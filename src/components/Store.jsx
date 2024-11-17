@@ -2,8 +2,18 @@ export function Store({ onClose, buyItem }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center    bg-opacity-50 z-50">
       <div className=" rounded-lg bg-shop-bg bg-cover shadow-lg p-6 w-[900px] h-[430px]  max-w-2xl">
-      <div className="flex justify-center mt-24">
-        <div className="grid grid-cols-2 mt-8  md:grid-cols-4">
+      
+      <div className="flex flex-col justify-center items-center">
+          <h3 className="text-gray-100 ml-3 font-PressStart2P font-bold text-xs">1UP!</h3> 
+          <button onClick={() => buyItem("revivir")} className="text-white   rounded w-20 h-20 ml-2" > 
+          <img src="../../public/1up.webp" className="w-full " />
+          <p className="text-xs font-PressStart2P">30$</p>
+          </button>
+      </div>
+
+      <div className="flex justify-center mt-8">
+        
+        <div className="grid grid-cols-2  md:grid-cols-4">
           <div className="flex flex-col items-center justify-center text-center">
           <h3 className="text-gray-100  font-PressStart2P font-bold text-xs">Comida</h3>
             <button onClick={() => buyItem("comida")}>
