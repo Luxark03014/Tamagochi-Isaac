@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Store } from "./Store";
+import { GameOver } from "./GameOver";
 
 export function Tamagotchi() {
   const [isStoreOpen, setIsStoreOpen] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
   const [hunger, setHunger] = useState(
     () => parseInt(localStorage.getItem("hunger")) || 50
   );
@@ -34,14 +36,24 @@ export function Tamagotchi() {
     () => parseInt(localStorage.getItem("speedBar")) || 0
   );
   const [coins, setCoins] = useState(
-    () => parseInt(localStorage.getItem("coins")) || 100
+    () => parseInt(localStorage.getItem("coins")) || 0
   );
-  const [inventory, setInventory] = useState([
-    { name: "cepillo", image: "../../public/diente.webp", price: 15, count: 0 },
-    { name: "comida", image: "../../public/cena.webp", price: 10, count: 0 },
-    { name: "juguete", image: "../../public/peluche.png", price: 12, count: 0 },
-    { name: "energizante", image: "../../public/batery.webp", price: 20,  count: 0 },
-  ]);
+  const [inventory, setInventory] = useState(() => {
+    const storedInventory = localStorage.getItem("inventory");
+    return storedInventory
+      ? JSON.parse(storedInventory)
+      : [
+          { name: "cepillo", image: "../../public/diente.webp", price: 15, count: 0 },
+          { name: "comida", image: "../../public/cena.webp", price: 10, count: 0 },
+          { name: "juguete", image: "../../public/peluche.png", price: 12, count: 0 },
+          { name: "energizante", image: "../../public/batery.webp", price: 20, count: 0 },
+          { name: "revivir", image: "../../public/1up.webp", price: 30, count: 0 },
+        ];
+  });
+  const [isRevive, setIsRevive] = useState(false);
+  useEffect(() => {
+    localStorage.setItem("inventory", JSON.stringify(inventory));
+  }, [inventory]);
 
   useEffect(() => {
     localStorage.setItem("hunger", hunger);
@@ -54,6 +66,7 @@ export function Tamagotchi() {
     localStorage.setItem("levelExp", levelExp);
     localStorage.setItem("minStats", minStats);
     localStorage.setItem("speedBar", speedBar);
+    localStorage.setItem("coins", coins);
   }, [
     hunger,
     happiness,
@@ -65,8 +78,15 @@ export function Tamagotchi() {
     levelExp,
     minStats,
     speedBar,
+    coins,
   ]);
+  useEffect(() => {
+    const reviveItem = inventory.find((item) => item.name === "revivir");
+    if(reviveItem.count > 0){
+      setIsRevive(true);
 
+    }
+  }, [inventory]);
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -83,8 +103,21 @@ export function Tamagotchi() {
     };
   }, []);
 
- 
-
+  const revive = () => {
+    setHealth(50);
+    setHunger(50);
+    setHygiene(50);
+    setHappiness(50);
+    setStamina(50);
+    setIsGameOver(false);
+    
+   
+    setInventory((prevInventory) =>
+      prevInventory.map((item) =>
+        item.name === "revivir" ? { ...item, count: item.count - 1 } : item
+      )
+    );
+  };
   const wash = () => {
     setHygiene((prev) => Math.min(prev + 20, 100));
   };
@@ -130,33 +163,38 @@ export function Tamagotchi() {
         break;
       case "revivir":
         if(coins >= 30){
-         
+          setInventory((prevInventory) => prevInventory.map((item) => item.name === value ? { ...item, count: item.count + 1 } : item));
           setCoins((prev) => Math.max(prev - 30, 0));}
       }
         
    
   }
   const useItem = (itemType) => {
+    setInventory((prevInventory) =>
+      prevInventory.map((item) =>
+        item.name === itemType ? { ...item, count: item.count - 1 } : item
+      )
+    );
 
     switch (itemType) {
       case "comida":
         setHunger((prev) => Math.min(prev + 20, 100));
-        setInventory((prevInventory) => prevInventory.map((item) => item.name === itemType ? { ...item, count: item.count - 1 } : item));
         break;
       case "juguete":
         setHappiness((prev) => Math.min(prev + 20, 100));
-        setInventory((prevInventory) => prevInventory.map((item) => item.name === itemType ? { ...item, count: item.count - 1 } : item));
         break;
       case "cepillo":
         setHygiene((prev) => Math.min(prev + 30, 100));
-        setInventory((prevInventory) => prevInventory.map((item) => item.name === itemType ? { ...item, count: item.count - 1 } : item));
         break;
       case "energizante":
         setStamina((prev) => Math.min(prev + 50, 100));
-        setInventory((prevInventory) => prevInventory.map((item) => item.name === itemType ? { ...item, count: item.count - 1 } : item));
-        break
-  } 
-}
+        break;
+      case "revivir":
+        // The actual revival logic is handled in the revive function
+        break;
+    }
+  };
+
 
   useEffect(() => {
     if (experience === 100) {
@@ -199,14 +237,8 @@ export function Tamagotchi() {
       hygiene === 0 ||
       stamina === 0
     ) {
-      alert("Game Over");
-      setHunger(50);
-      setHappiness(50);
-      setHealth(100);
-      setHygiene(100);
-      setStamina(100);
-      setExperience(0);
-      setLevel(1);
+      setIsGameOver(true);
+     
     }
     if (
       hunger > minStats &&
@@ -254,7 +286,7 @@ export function Tamagotchi() {
       <div className="p-5  w-[35%] h-1/4  rounded-lg  font-Terminus overflow-hidden ">
         <div className="text-2xl font-bold text-center mb-4">
           <div className="flex flex-col justify-center">
-            <h1 className="font-bold">Nivel {level}</h1>
+            <h1 className="font-bold text-white">Nivel {level}</h1>
           </div>
           <div className="w-full mt-5 flex flex-row justify-between">
             <div className="w-1/3 flex flex-row  items-center">
@@ -410,6 +442,20 @@ export function Tamagotchi() {
 
        <div>
         {isStoreOpen && <Store buyItem={buyItem}  onClose={() => setIsStoreOpen(false)} />}
+        </div>
+        <div>
+        {isGameOver && (
+          <GameOver
+            onClose={(shouldRevive) => {
+              if (shouldRevive) {
+                revive();
+              } else {
+                setIsGameOver(false);
+              }
+            }}
+            canRevive={inventory.find((item) => item.name === "revivir")?.count > 0}
+          />
+        )}
         </div>
       </div>
     </div>
